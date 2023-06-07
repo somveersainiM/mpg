@@ -4,7 +4,7 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
-  alias(libs.plugins.mavenPublish)
+  id("maven-publish")
 }
 
 kotlin {
@@ -60,8 +60,25 @@ kotlin {
   }
 }
 
-configure<MavenPublishBaseExtension> {
-  configure(
-    KotlinMultiplatform(javadocJar = JavadocJar.Empty())
-  )
+
+publishing {
+
+  publications {
+    repositories {
+      maven {
+        /** Configure path of your package repository on Github
+         *  Replace GITHUB_USERID with your/organisation Github userID and REPOSITORY with the repository name on GitHub
+         */
+        setUrl(uri("https://gitlab.com/api/v4/projects/29868680/packages/maven"))
+
+        credentials(HttpHeaderCredentials::class) {
+          name = "Deploy-Token"
+          value = "RFxnv5NkW-Afn5NRtDpS"
+        }
+        authentication {
+          create<HttpHeaderAuthentication>("header")
+        }
+      }
+    }
+  }
 }

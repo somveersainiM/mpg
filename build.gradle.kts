@@ -4,51 +4,39 @@ import com.vanniktech.maven.publish.SonatypeHost
 plugins {
   alias(libs.plugins.kotlin.serialization) apply false
   alias(libs.plugins.mavenPublish) apply false
+  id("maven-publish")
 }
 
 allprojects {
   group = "app.cash.paging"
-  version = "${rootProject.libs.versions.androidx.paging.get()}-0.1.1"
+  version = "${rootProject.libs.versions.androidx.paging.get()}-0.1.2"
 
   repositories {
     mavenCentral()
     google()
   }
 
-  plugins.withId("com.vanniktech.maven.publish.base") {
-    configure<PublishingExtension> {
-      repositories {
-        maven {
-          name = "testMaven"
-          url = file("${rootProject.buildDir}/testMaven").toURI()
+}
+
+publishing {
+  publications.withType<MavenPublication> {
+    this.artifactId = "${rootProject.name}-${project.name}"
+  }
+
+  publications {
+    repositories {
+      maven {
+        /** Configure path of your package repository on Github
+         *  Replace GITHUB_USERID with your/organisation Github userID and REPOSITORY with the repository name on GitHub
+         */
+        setUrl(uri("https://gitlab.com/api/v4/projects/29868680/packages/maven"))
+
+        credentials(HttpHeaderCredentials::class) {
+          name = "Deploy-Token"
+          value = "RFxnv5NkW-Afn5NRtDpS"
         }
-      }
-    }
-    @Suppress("UnstableApiUsage")
-    configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(SonatypeHost.DEFAULT)
-      signAllPublications()
-      pom {
-        description.set("Packages AndroidX's Paging library for Kotlin/Multiplatform.")
-        name.set(project.name)
-        url.set("https://github.com/cashapp/multiplatform-paging/")
-        licenses {
-          license {
-            name.set("The Apache Software License, Version 2.0")
-            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-            distribution.set("repo")
-          }
-        }
-        developers {
-          developer {
-            id.set("cashapp")
-            name.set("Cash App")
-          }
-        }
-        scm {
-          url.set("https://github.com/cashapp/multiplatform-paging/")
-          connection.set("scm:git:https://github.com/cashapp/multiplatform-paging.git")
-          developerConnection.set("scm:git:ssh://git@github.com/cashapp/multiplatform-paging.git")
+        authentication {
+          create<HttpHeaderAuthentication>("header")
         }
       }
     }
